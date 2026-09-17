@@ -3,13 +3,14 @@ import { createStore, produce } from "solid-js/store"
 import { Persist, persisted } from "@/utils/persist"
 import { createScopedCache } from "@/utils/scoped-cache"
 import type { FileViewState, SelectedLineRange } from "./types"
+import type { ServerScope } from "@/utils/server-scope"
 
 const WORKSPACE_KEY = "__workspace__"
 const MAX_FILE_VIEW_SESSIONS = 20
 const MAX_VIEW_FILES = 500
 
 function normalizeSelectedLines(range: SelectedLineRange): SelectedLineRange {
-  if (range.start <= range.end) return range
+  if (range.start <= range.end) return { ...range }
 
   const startSide = range.side
   const endSide = range.endSide ?? startSide
@@ -23,11 +24,21 @@ function normalizeSelectedLines(range: SelectedLineRange): SelectedLineRange {
   }
 }
 
-function createViewSession(dir: string, id: string | undefined) {
+function equalSelectedLines(a: SelectedLineRange | null | undefined, b: SelectedLineRange | null | undefined) {
+  if (!a && !b) return true
+  if (!a || !b) return false
+  const left = normalizeSelectedLines(a)
+  const right = normalizeSelectedLines(b)
+  return (
+    left.start === right.start && left.end === right.end && left.side === right.side && left.endSide === right.endSide
+  )
+}
+
+function createViewSession(scope: ServerScope, dir: string, id: string | undefined) {
   const legacyViewKey = `${dir}/file${id ? "/" + id : ""}.v1`
 
   const [view, setView, _, ready] = persisted(
-    Persist.scoped(dir, id, "file-view", [legacyViewKey]),
+    Persist.serverScoped(scope, dir, id, "file-view", [legacyViewKey]),
     createStore<{
       file: Record<string, FileViewState>
     }>({
@@ -65,36 +76,36 @@ function createViewSession(dir: string, id: string | undefined) {
   const selectedLines = (path: string) => view.file[path]?.selectedLines
 
   const setScrollTop = (path: string, top: number) => {
-    setView("file", path, (current) => {
-      if (current?.scrollTop === top) return current
-      return {
-        ...(current ?? {}),
-        scrollTop: top,
-      }
-    })
+    setView(
+      produce((draft) => {
+        const file = draft.file[path] ?? (draft.file[path] = {})
+        if (file.scrollTop === top) return
+        file.scrollTop = top
+      }),
+    )
     pruneView(path)
   }
 
   const setScrollLeft = (path: string, left: number) => {
-    setView("file", path, (current) => {
-      if (current?.scrollLeft === left) return current
-      return {
-        ...(current ?? {}),
-        scrollLeft: left,
-      }
-    })
+    setView(
+      produce((draft) => {
+        const file = draft.file[path] ?? (draft.file[path] = {})
+        if (file.scrollLeft === left) return
+        file.scrollLeft = left
+      }),
+    )
     pruneView(path)
   }
 
   const setSelectedLines = (path: string, range: SelectedLineRange | null) => {
     const next = range ? normalizeSelectedLines(range) : null
-    setView("file", path, (current) => {
-      if (current?.selectedLines === next) return current
-      return {
-        ...(current ?? {}),
-        selectedLines: next,
-      }
-    })
+    setView(
+      produce((draft) => {
+        const file = draft.file[path] ?? (draft.file[path] = {})
+        if (equalSelectedLines(file.selectedLines, next)) return
+        file.selectedLines = next
+      }),
+    )
     pruneView(path)
   }
 
@@ -109,14 +120,14 @@ function createViewSession(dir: string, id: string | undefined) {
   }
 }
 
-export function createFileViewCache() {
+export function createFileViewCache(scope: ServerScope) {
   const cache = createScopedCache(
     (key) => {
       const split = key.lastIndexOf("\n")
       const dir = split >= 0 ? key.slice(0, split) : key
       const id = split >= 0 ? key.slice(split + 1) : WORKSPACE_KEY
       return createRoot((dispose) => ({
-        value: createViewSession(dir, id === WORKSPACE_KEY ? undefined : id),
+        value: createViewSession(scope, dir, id === WORKSPACE_KEY ? undefined : id),
         dispose,
       }))
     },

@@ -1,5 +1,5 @@
 ---
-title: ACP support
+title: ACP-understøttelse
 description: Brug OpenCode i enhver ACP-kompatibel editor.
 ---
 
@@ -13,7 +13,7 @@ ACP er en åben protokol, der standardiserer kommunikation mellem kodeeditorer o
 
 ---
 
-## Konfigurer
+## Konfiguration
 
 For at bruge OpenCode via ACP, konfigurer din editor til at køre kommandoen `opencode acp`.
 
@@ -25,12 +25,15 @@ Nedenfor er eksempler på populære editorer, der understøtter ACP.
 
 ### Zed
 
-Føj til din [Zed](https://zed.dev)-konfiguration (`~/.config/zed/settings.json`):
+Installer OpenCode fra [Zeds ACP-register](https://zed.dev/docs/ai/external-agents#registry) ved at køre `zed: acp registry` i kommandopaletten.
+
+Hvis du i stedet vil bruge en brugerdefineret OpenCode-eksekverbar fil, skal du føje den til din [Zed](https://zed.dev)-konfiguration (`~/.config/zed/settings.json`):
 
 ```json title="~/.config/zed/settings.json"
 {
   "agent_servers": {
     "OpenCode": {
+      "type": "custom",
       "command": "opencode",
       "args": ["acp"]
     }
@@ -140,7 +143,7 @@ Denne konfiguration sætter CodeCompanion til at bruge OpenCode som ACP-agent ti
 
 Hvis du har brug for at sende miljøvariabler (som `OPENCODE_API_KEY`), henvises til [Konfiguration af adaptere: Miljøvariabler](https://codecompanion.olimorris.dev/getting-started#setting-an-api-key) i CodeCompanion.nvim-dokumentationen for alle detaljer.
 
-## Support
+## Understøttelse
 
 OpenCode fungerer på samme måde via ACP som i terminalen. Alle funktioner understøtter:
 

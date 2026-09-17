@@ -13,7 +13,7 @@ ACP je otvoreni protokol koji standardizira komunikaciju između uređivača kod
 
 ---
 
-## Konfiguriši
+## Konfiguracija
 
 Da biste koristili OpenCode putem ACP-a, konfigurirajte svoj uređivač da pokrene naredbu `opencode acp`.
 
@@ -25,12 +25,15 @@ Ispod su primjeri za popularne uređivače koji podržavaju ACP.
 
 ### Zed
 
-Dodajte u svoju [Zed](https://zed.dev) konfiguraciju (`~/.config/zed/settings.json`):
+Instalirajte OpenCode iz [Zed ACP registra](https://zed.dev/docs/ai/external-agents#registry) pokretanjem naredbe `zed: acp registry` u komandnoj paleti.
+
+Ako umjesto toga želite koristiti prilagođenu OpenCode izvršnu datoteku, dodajte je u svoju [Zed](https://zed.dev) konfiguraciju (`~/.config/zed/settings.json`):
 
 ```json title="~/.config/zed/settings.json"
 {
   "agent_servers": {
     "OpenCode": {
+      "type": "custom",
       "command": "opencode",
       "args": ["acp"]
     }
@@ -140,7 +143,7 @@ Ova konfiguracija postavlja CodeCompanion da koristi OpenCode kao ACP chat agent
 
 Ako trebate proslijediti varijable okruženja (kao što je `OPENCODE_API_KEY`), pogledajte [Configuring Adapters: Environment Variables](https://codecompanion.olimorris.dev/getting-started#setting-an-api-key) u dokumentaciji CodeCompanion.nvim.
 
-## Podrška
+## Podržane funkcije
 
 OpenCode radi isto kroz ACP kao i u terminalu. Podržane su sve funkcije:
 

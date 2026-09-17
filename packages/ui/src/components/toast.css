@@ -1,7 +1,7 @@
 [data-component="toast-region"] {
   position: fixed;
   bottom: 48px;
-  right: 32px;
+  inset-inline-end: 32px;
   z-index: 1000;
   display: flex;
   flex-direction: column;
@@ -21,6 +21,11 @@
     padding: 0;
     max-height: 100%;
     overflow-y: auto;
+    scrollbar-width: none;
+
+    &::-webkit-scrollbar {
+      display: none;
+    }
   }
 }
 
@@ -101,6 +106,11 @@
     min-width: 0;
     overflow-x: hidden;
     overflow-y: auto;
+    scrollbar-width: none;
+
+    &::-webkit-scrollbar {
+      display: none;
+    }
   }
 
   [data-slot="toast-title"] {
